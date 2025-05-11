@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Favicon Generator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='20' font-size='20'>⚙️</text></svg>">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --code-bg: #f5f5f5;
+            --border-color: #e0e0e0;
+            --accent-color: #007fff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --code-bg: #2d2d2d;
+            --border-color: #444444;
+            --accent-color: #00a0ff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        section {
+            margin-bottom: 40px;
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] section {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            border: 1px solid var(--border-color);
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background-color: var(--code-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .theme-toggle, .lang-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        .theme-toggle {
+            right: 20px;
+        }
+
+        .lang-toggle {
+            right: 120px;
+        }
+
+        .note {
+            background-color: rgba(0, 127, 255, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .favicon-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .favicon-preview img {
+            width: 64px;
+            height: 64px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            background-color: var(--code-bg);
+        }
+
+        [lang="zh"] {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .value-display {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .file-input-label:hover {
+            opacity: 0.9;
+        }
+
+        .filename-display {
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .download-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .download-group input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            header {
+                margin-bottom: 30px;
+            }
+            
+            section {
+                padding: 15px;
+            }
+
+            .lang-toggle {
+                right: 100px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="lang-toggle" id="langToggle">中文</button>
+    <button class="theme-toggle" id="themeToggle">Dark Mode</button>
+    
+    <div class="container">
+        <!-- English Content -->
+        <div id="en-content">
+            <header>
+                <h1>Animated Favicon Generator</h1>
+                <p class="subtitle">Create and customize dynamic favicons in real-time</p>
+            </header>
+
+            <section id="preview">
+                <h2>Live Preview</h2>
+                <div class="favicon-preview">
+                    <img id="faviconPreview" alt="Animated favicon preview">
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="animationSpeed">Animation Speed</label>
+                        <input type="range" id="animationSpeed" min="10" max="200" value="60">
+                        <div class="value-display"><span id="speedValue">60</span> fps</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="colorScheme">Color Scheme</label>
+                        <select id="colorScheme" class="control-select">
+                            <option value="default">Default</option>
+                            <option value="monochrome">Monochrome</option>
+                            <option value="rainbow">Rainbow</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Import SVG</label>
+                    <label for="svgUpload" class="file-input-label">Choose SVG File</label>
+                    <input type="file" id="svgUpload" class="file-input" accept=".svg">
+                    <div id="filenameDisplay" class="filename-display">No file selected</div>
+                </div>
+            </section>
+
+            <section id="code">
+                <h2>Generated Code</h2>
+                <pre><code id="generatedCode">// Code will appear here</code></pre>
+                <div class="download-group">
+                    <input type="text" id="jsFilename" placeholder="animated-favicon.js">
+                    <button id="downloadJs">Download JS File</button>
+                </div>
+            </section>
+
+            <section id="how-to-use">
+                <h2>How to Use</h2>
+                <ol>
+                    <li>Adjust the controls to customize your favicon animation</li>
+                    <li>Import your own SVG (optional)</li>
+                    <li>Copy the generated code or download as a JS file</li>
+                    <li>Add this to your HTML head: <code>&lt;link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,..."&gt;</code></li>
+                </ol>
+            </section>
+        </div>
+
+        <!-- Chinese Content -->
+        <div id="zh-content" class="hidden" lang="zh">
+            <header>
+                <h1>动态网站图标生成器</h1>
+                <p class="subtitle">实时创建和自定义动态网站图标</p>
+            </header>
+
+            <section id="preview">
+                <h2>实时预览</h2>
+                <div class="favicon-preview">
+                    <img id="faviconPreviewZh" alt="动态网站图标预览">
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="animationSpeedZh">动画速度</label>
+                        <input type="range" id="animationSpeedZh" min="10" max="200" value="60">
+                        <div class="value-display"><span id="speedValueZh">60</span> 帧/秒</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="colorSchemeZh">配色方案</label>
+                        <select id="colorSchemeZh" class="control-select">
+                            <option value="default">默认</option>
+                            <option value="monochrome">单色</option>
+                            <option value="rainbow">彩虹</option>
+                            <option value="custom">自定义</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>导入SVG</label>
+                    <label for="svgUploadZh" class="file-input-label">选择SVG文件</label>
+                    <input type="file" id="svgUploadZh" class="file-input" accept=".svg">
+                    <div id="filenameDisplayZh" class="filename-display">未选择文件</div>
+                </div>
+            </section>
+
+            <section id="code">
+                <h2>生成代码</h2>
+                <pre><code id="generatedCodeZh">// 代码将显示在这里</code></pre>
+                <div class="download-group">
+                    <input type="text" id="jsFilenameZh" placeholder="animated-favicon.js">
+                    <button id="downloadJsZh">下载JS文件</button>
+                </div>
+            </section>
+
+            <section id="how-to-use">
+                <h2>使用方法</h2>
+                <ol>
+                    <li>调整控件自定义您的网站图标动画</li>
+                    <li>导入您自己的SVG文件(可选)</li>
+                    <li>复制生成的代码或下载为JS文件</li>
+                    <li>在HTML头部添加: <code>&lt;link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,..."&gt;</code></li>
+                </ol>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let darkMode = prefersDark;
+        
+        function updateTheme() {
+            document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+            themeToggle.textContent = darkMode ? 'Light Mode' : 'Dark Mode';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            darkMode = !darkMode;
+            updateTheme();
+        });
+        
+        updateTheme();
+        
+        // Language toggle
+        const langToggle = document.getElementById('langToggle');
+        let currentLang = 'en';
+        
+        function updateLanguage() {
+            if (currentLang === 'en') {
+                document.getElementById('en-content').classList.add('hidden');
+                document.getElementById('zh-content').classList.remove('hidden');
+                langToggle.textContent = 'English';
+                currentLang = 'zh';
+            } else {
+                document.getElementById('zh-content').classList.add('hidden');
+                document.getElementById('en-content').classList.remove('hidden');
+                langToggle.textContent = '中文';
+                currentLang = 'en';
+            }
+        }
+        
+        langToggle.addEventListener('click', updateLanguage);
+        
+        // Final Robust Favicon Generator
+        document.addEventListener('DOMContentLoaded', () => {
+            const linkRelIcon = document.querySelector("link[rel='icon']");
+            const globalTimers = { t30: 0, t60: 0 };
+            let animationSpeed = 60;
+            let colorScheme = 'default';
+            let customSvg = null;
+            let svgViewBox = '0 0 32 32';
+            let svgMarkup = '';
+            
+            // Get all control elements
+            const speedControl = document.getElementById('animationSpeed');
+            const speedControlZh = document.getElementById('animationSpeedZh');
+            const speedValue = document.getElementById('speedValue');
+            const speedValueZh = document.getElementById('speedValueZh');
+            const colorControl = document.getElementById('colorScheme');
+            const colorControlZh = document.getElementById('colorSchemeZh');
+            const svgUpload = document.getElementById('svgUpload');
+            const svgUploadZh = document.getElementById('svgUploadZh');
+            const filenameDisplay = document.getElementById('filenameDisplay');
+            const filenameDisplayZh = document.getElementById('filenameDisplayZh');
+            const codeDisplay = document.getElementById('generatedCode');
+            const codeDisplayZh = document.getElementById('generatedCodeZh');
+            const downloadButton = document.getElementById('downloadJs');
+            const downloadButtonZh = document.getElementById('downloadJsZh');
+            const jsFilenameInput = document.getElementById('jsFilename');
+            const jsFilenameInputZh = document.getElementById('jsFilenameZh');
+            
+            // Set up event listeners
+            speedControl.addEventListener('input', updateSpeed);
+            speedControlZh.addEventListener('input', updateSpeed);
+            colorControl.addEventListener('change', updateColorScheme);
+            colorControlZh.addEventListener('change', updateColorScheme);
+            svgUpload.addEventListener('change', handleSvgUpload);
+            svgUploadZh.addEventListener('change', handleSvgUpload);
+            downloadButton.addEventListener('click', downloadJsFile);
+            downloadButtonZh.addEventListener('click', downloadJsFile);
+            
+            function updateSpeed(e) {
+                animationSpeed = e.target.value;
+                speedControl.value = animationSpeed;
+                speedControlZh.value = animationSpeed;
+                speedValue.textContent = animationSpeed;
+                speedValueZh.textContent = animationSpeed;
+                
+                clearInterval(animationInterval);
+                animationInterval = setInterval(animationLoop, 1000 / animationSpeed);
+            }
+            
+            function updateColorScheme(e) {
+                colorScheme = e.target.value;
+                colorControl.value = colorScheme;
+                colorControlZh.value = colorScheme;
+            }
+            
+            function handleSvgUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const display = currentLang === 'en' ? filenameDisplay : filenameDisplayZh;
+                display.textContent = file.name;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        customSvg = event.target.result;
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(customSvg, 'image/svg+xml');
+                        const svgElement = doc.querySelector('svg');
+                        
+                        if (svgElement) {
+                            // Get or calculate viewBox
+                            if (svgElement.hasAttribute('viewBox')) {
+                                svgViewBox = svgElement.getAttribute('viewBox');
+                            } else {
+                                const width = parseFloat(svgElement.getAttribute('width')) || 32;
+                                const height = parseFloat(svgElement.getAttribute('height')) || 32;
+                                svgViewBox = `0 0 ${width} ${height}`;
+                            }
+                            
+                            // Extract inner SVG markup
+                            svgMarkup = '';
+                            Array.from(svgElement.children).forEach(child => {
+                                svgMarkup += child.outerHTML;
+                            });
+                            
+                            // Initialize preview
+                            generateFavIcon();
+                        }
+                    } catch (error) {
+                        console.error('Error parsing SVG:', error);
+                        alert(currentLang === 'en' 
+                            ? 'Error parsing SVG file. Please check the file and try again.' 
+                            : '解析SVG文件时出错。请检查文件后重试。');
+                    }
+                };
+                reader.onerror = function() {
+                    alert(currentLang === 'en' 
+                        ? 'Error reading SVG file.' 
+                        : '读取SVG文件时出错。');
+                };
+                reader.readAsText(file);
+            }
+            
+            function downloadJsFile() {
+                const code = generateCodeSnippet();
+                const filenameInput = currentLang === 'en' ? jsFilenameInput : jsFilenameInputZh;
+                let filename = filenameInput.value.trim() || `animated-favicon-${new Date().toISOString().slice(0, 10)}.js`;
+                
+                if (!filename.endsWith('.js')) {
+                    filename += '.js';
+                }
+                
+                const blob = new Blob([code], { type: 'application/javascript' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            
+            function generateFavIcon() {
+                const time = globalTimers.t60 / 60;
+                
+                if (customSvg && svgMarkup) {
+                    generateCustomFavIcon(time);
+                } else {
+                    generateDefaultFavIcon(time);
+                }
+                
+                updatePreviews();
+                updateCodeDisplay();
+            }
+            
+            function generateCustomFavIcon(time) {
+                try {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = svgMarkup;
+                    
+                    // Count animatable elements first
+                    let animatableCount = 0;
+                    const allElements = tempDiv.querySelectorAll('*');
+                    allElements.forEach(element => {
+                        if (shouldAnimateElement(element)) animatableCount++;
+                    });
+                    
+                    // Apply animations
+                    let currentIndex = 0;
+                    allElements.forEach(element => {
+                        if (!shouldAnimateElement(element)) return;
+                        
+                        const elementTime = time + (currentIndex * 0.05);
+                        animateElement(element, elementTime, animatableCount);
+                        currentIndex++;
+                    });
+                    
+                    const svgContent = `<svg width="32" height="32" viewBox="${svgViewBox}" xmlns="http://www.w3.org/2000/svg">${tempDiv.innerHTML}</svg>`;
+                    updateFavicon(svgContent);
+                } catch (error) {
+                    console.error('Error generating custom favicon:', error);
+                }
+            }
+            
+            function shouldAnimateElement(element) {
+                if (element.style.display === 'none') return false;
+                
+                return element.hasAttribute('fill') || 
+                       element.hasAttribute('stroke') || 
+                       element.hasAttribute('opacity') ||
+                       element.hasAttribute('transform') ||
+                       element.hasAttribute('stroke-width');
+            }
+            
+            function animateElement(element, time, totalElements) {
+                // Animate fill if present and not 'none'
+                if (element.hasAttribute('fill') && element.getAttribute('fill') !== 'none') {
+                    element.setAttribute('fill', getColor(0, time));
+                }
+                
+                // Animate stroke if present and not 'none'
+                if (element.hasAttribute('stroke') && element.getAttribute('stroke') !== 'none') {
+                    element.setAttribute('stroke', getColor(1, time));
+                }
+                
+                // Animate stroke width if present
+                if (element.hasAttribute('stroke-width')) {
+                    const strokeWidth = parseFloat(element.getAttribute('stroke-width'));
+                    element.setAttribute('stroke-width', sine(strokeWidth * 0.8, strokeWidth * 1.2, time));
+                }
+                
+                // Animate opacity if present
+                if (element.hasAttribute('opacity')) {
+                    element.setAttribute('opacity', sine(0.6, 1, time));
+                }
+                
+                // Add subtle transform animation
+                if (element.hasAttribute('transform')) {
+                    const transforms = [];
+                    const originalTransform = element.getAttribute('transform');
+                    
+                    if (originalTransform) transforms.push(originalTransform);
+                    
+                    const intensity = Math.min(0.5, 1 / Math.sqrt(totalElements));
+                    transforms.push(`rotate(${sine(-5 * intensity, 5 * intensity, time)})`);
+                    transforms.push(`scale(${sine(1 - (0.1 * intensity), 1 + (0.1 * intensity), time + 0.3)})`);
+                    
+                    element.setAttribute('transform', transforms.join(' '));
+                }
+            }
+            
+            function generateDefaultFavIcon(time) {
+                const hasStroke = colorScheme !== 'monochrome';
+                const svg = `
+                    <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="${getColor(0, time)}" d="M16,${sine(8, 12, time)}c-4,0-8,3-8,8s4,8,8,8s8-3,8-8S20,${sine(8, 12, time)},16,${sine(8, 12, time)}z"
+                              ${hasStroke ? `stroke="${getColor(3, time)}" stroke-width="${sine(0.5, 2, time)}"` : ''}/>
+                        <circle cx="${sine(8, 24, time)}" cy="${sine(8, 24, time)}" r="${sine(2, 6, time)}" fill="${getColor(1, time)}"
+                                ${hasStroke ? `stroke="${getColor(2, time)}" stroke-width="${sine(0.5, 1.5, time)}"` : ''}/>
+                    </svg>
+                `;
+                
+                updateFavicon(svg);
+            }
+            
+            function updateFavicon(svgContent) {
+                const encodedSVG = encodeURIComponent(svgContent)
+                    .replace(/'/g, '%27')
+                    .replace(/"/g, '%22');
+                
+                linkRelIcon.href = `data:image/svg+xml,${encodedSVG}`;
+            }
+            
+            function updatePreviews() {
+                document.getElementById('faviconPreview').src = linkRelIcon.href;
+                document.getElementById('faviconPreviewZh').src = linkRelIcon.href;
+            }
+            
+            function updateCodeDisplay() {
+                codeDisplay.textContent = generateCodeSnippet();
+                codeDisplayZh.textContent = generateCodeSnippet();
+            }
+            
+            function generateCodeSnippet() {
+                if (customSvg && svgMarkup) {
+                    return generateCustomSvgCode();
+                } else {
+                    return generateDefaultCode();
+                }
+            }
+            
+            function generateDefaultCode() {
+                const hasStroke = colorScheme !== 'monochrome';
+                return `// Animated Favicon Generator
+const linkRelIcon = document.querySelector("link[rel='icon']");
+const globalTimers = { t30: 0, t60: 0 };
+const animationSpeed = ${animationSpeed};
+
+const sine = (a, b, t) => a + (b - a) * (Math.sin(Math.PI * t * 2));
+
+const generateFavIcon = () => {
+    const time = globalTimers.t60 / 60;
+    
+    const svg = \`
+        <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <path fill="\${getColor(0, time)}" d="M16,\${sine(8, 12, time)}c-4,0-8,3-8,8s4,8,8,8s8-3,8-8S20,\${sine(8, 12, time)},16,\${sine(8, 12, time)}z"
+                  ${hasStroke ? `stroke="\${getColor(3, time)}" stroke-width="\${sine(0.5, 2, time)}"` : ''}/>
+            <circle cx="\${sine(8, 24, time)}" cy="\${sine(8, 24, time)}" r="\${sine(2, 6, time)}" fill="\${getColor(1, time)}"
+                    ${hasStroke ? `stroke="\${getColor(2, time)}" stroke-width="\${sine(0.5, 1.5, time)}"` : ''}/>
+        </svg>
+    \`;
+    
+    const encodedSVG = encodeURIComponent(svg)
+        .replace(/'/g, '%27')
+        .replace(/"/g, '%22');
+    
+    linkRelIcon.href = \`data:image/svg+xml,\${encodedSVG}\`;
+};
+
+function getColor(index, time) {
+    switch("${colorScheme}") {
+        case "monochrome": return \`hsl(210, 100%, \${sine(40,80,time)}%)\`;
+        case "rainbow": return \`hsl(\${(time*360 + index*120)%360}, 100%, 50%)\`;
+        case "custom": return "#" + Math.floor(sine(0,0xFFFFFF,time)).toString(16).padStart(6,'0');
+        default: return ["#007fff","#00ffff","#ff00ff"][index % 3];
+    }
+}
+
+// Start animation
+let animationInterval = setInterval(() => {
+    globalTimers.t30 = (globalTimers.t30 + 1) % 30;
+    globalTimers.t60 = (globalTimers.t60 + 1) % 60;
+    generateFavIcon();
+}, 1000 / animationSpeed);`;
+            }
+            
+            function generateCustomSvgCode() {
+                return `// Animated Favicon Generator with Custom SVG
+const linkRelIcon = document.querySelector("link[rel='icon']");
+const globalTimers = { t30: 0, t60: 0 };
+const animationSpeed = ${animationSpeed};
+
+const sine = (a, b, t) => a + (b - a) * (Math.sin(Math.PI * t * 2));
+
+const svgMarkup = \`${svgMarkup.replace(/`/g, '\\`')}\`;
+const svgViewBox = "${svgViewBox}";
+
+const generateFavIcon = () => {
+    const time = globalTimers.t60 / 60;
+    
+    try {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = svgMarkup;
+        
+        // Count animatable elements first
+        let animatableCount = 0;
+        const allElements = tempDiv.querySelectorAll('*');
+        allElements.forEach(element => {
+            if (shouldAnimateElement(element)) animatableCount++;
+        });
+        
+        // Apply animations
+        let currentIndex = 0;
+        allElements.forEach(element => {
+            if (!shouldAnimateElement(element)) return;
+            
+            const elementTime = time + (currentIndex * 0.05);
+            animateElement(element, elementTime, animatableCount);
+            currentIndex++;
+        });
+        
+        const svgContent = \`<svg width="32" height="32" viewBox="\${svgViewBox}" xmlns="http://www.w3.org/2000/svg">\${tempDiv.innerHTML}</svg>\`;
+        const encodedSVG = encodeURIComponent(svgContent)
+            .replace(/'/g, '%27')
+            .replace(/"/g, '%22');
+        
+        linkRelIcon.href = \`data:image/svg+xml,\${encodedSVG}\`;
+    } catch (error) {
+        console.error('Error generating favicon:', error);
+    }
+};
+
+function shouldAnimateElement(element) {
+    if (element.style.display === 'none') return false;
+    
+    return element.hasAttribute('fill') || 
+           element.hasAttribute('stroke') || 
+           element.hasAttribute('opacity') ||
+           element.hasAttribute('transform') ||
+           element.hasAttribute('stroke-width');
+}
+
+function animateElement(element, time, totalElements) {
+    // Animate fill if present and not 'none'
+    if (element.hasAttribute('fill') && element.getAttribute('fill') !== 'none') {
+        element.setAttribute('fill', getColor(0, time));
+    }
+    
+    // Animate stroke if present and not 'none'
+    if (element.hasAttribute('stroke') && element.getAttribute('stroke') !== 'none') {
+        element.setAttribute('stroke', getColor(1, time));
+    }
+    
+    // Animate stroke width if present
+    if (element.hasAttribute('stroke-width')) {
+        const strokeWidth = parseFloat(element.getAttribute('stroke-width'));
+        element.setAttribute('stroke-width', sine(strokeWidth * 0.8, strokeWidth * 1.2, time));
+    }
+    
+    // Animate opacity if present
+    if (element.hasAttribute('opacity')) {
+        element.setAttribute('opacity', sine(0.6, 1, time));
+    }
+    
+    // Add subtle transform animation
+    if (element.hasAttribute('transform')) {
+        const transforms = [];
+        const originalTransform = element.getAttribute('transform');
+        if (originalTransform) transforms.push(originalTransform);
+        
+        const intensity = Math.min(0.5, 1 / Math.sqrt(totalElements));
+        transforms.push(\`rotate(\${sine(-5 * intensity, 5 * intensity, time)})\`);
+        transforms.push(\`scale(\${sine(1 - (0.1 * intensity), 1 + (0.1 * intensity), time + 0.3)})\`);
+        
+        element.setAttribute('transform', transforms.join(' '));
+    }
+}
+
+function getColor(index, time) {
+    switch("${colorScheme}") {
+        case "monochrome": return \`hsl(210, 100%, \${sine(40,80,time)}%)\`;
+        case "rainbow": return \`hsl(\${(time*360 + index*120)%360}, 100%, 50%)\`;
+        case "custom": return "#" + Math.floor(sine(0,0xFFFFFF,time)).toString(16).padStart(6,'0');
+        default: return ["#007fff","#00ffff","#ff00ff"][index % 3];
+    }
+}
+
+// Start animation
+let animationInterval = setInterval(() => {
+    globalTimers.t30 = (globalTimers.t30 + 1) % 30;
+    globalTimers.t60 = (globalTimers.t60 + 1) % 60;
+    generateFavIcon();
+}, 1000 / animationSpeed);`;
+            }
+            
+            function getColor(index, time) {
+                switch(colorScheme) {
+                    case "monochrome": return `hsl(210, 100%, ${sine(40,80,time)}%)`;
+                    case "rainbow": return `hsl(${(time*360 + index*120)%360}, 100%, 50%)`;
+                    case "custom": return "#" + Math.floor(sine(0,0xFFFFFF,time)).toString(16).padStart(6,'0');
+                    default: return ["#007fff","#00ffff","#ff00ff"][index % 3];
+                }
+            }
+            
+            const sine = (a, b, t) => a + (b - a) * (Math.sin(Math.PI * t * 2));
+            
+            // Initial favicon generation
+            generateFavIcon();
+            
+            // Animation loop
+            let animationInterval = setInterval(() => {
+                globalTimers.t30 = (globalTimers.t30 + 1) % 30;
+                globalTimers.t60 = (globalTimers.t60 + 1) % 60;
+                generateFavIcon();
+            }, 1000 / animationSpeed);
+        });
+    </script>
+</body>
+</html>
